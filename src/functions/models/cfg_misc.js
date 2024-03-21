@@ -10,10 +10,7 @@ module.exports = async (client) => {
       guildname TEXT,
       bumprole VARCHAR(255) DEFAULT 0,
       autorole VARCHAR(255) DEFAULT 0,
-      mastercolor VARCHAR(255) DEFAULT '#000000',
-      leaderboard_style TEXT,
-      leaderboard_background TEXT,
-      rankcard_background TEXT
+      mastercolor VARCHAR(255) DEFAULT '#000000'
     )`);
 
     connection.release();
