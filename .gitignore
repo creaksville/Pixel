@@ -1,0 +1,5 @@
+node_modules/*
+node_modules
+src/backgrounds
+src/config/config.js
+src/config/webconfig.js

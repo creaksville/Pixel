@@ -1,0 +1,46 @@
+[
+    {
+        "name": "ItsFoss",
+        "url": "https://itsfoss.com/feed"
+    },
+    {
+        "name": "Phoronix",
+        "url": "https://www.phoronix.com/rss.php"
+    },
+    {
+        "name": "Bleeping Computer",
+        "url": "https://www.bleepingcomputer.com/feed/"
+    },
+    {
+        "name": "Arch Linux News",
+        "url": "https://archlinux.org/feeds/news"
+    },
+    {
+        "name": "Gaming on Linux",
+        "url": "https://www.gamingonlinux.com/article_rss.php"
+    },
+    {
+        "name": "Tech Crunch",
+        "url": "https://techcrunch.com/feed/"
+    },
+    {
+        "name": "Engadget",
+        "url": "https://www.engadget.com/rss.xml"
+    },
+    {
+        "name": "CNET",
+        "url": "https://www.cnet.com/rss/news/"
+    },
+    {
+        "name": "TechRadar",
+        "url": "https://www.techradar.com/rss"
+    },
+    {
+        "name": "Ars Technica",
+        "url": "https://arstechnica.com/feed/"
+    },
+    {
+        "name": "ZDNet",
+        "url": "https://www.zdnet.com/news/rss.xml"
+    }
+]
