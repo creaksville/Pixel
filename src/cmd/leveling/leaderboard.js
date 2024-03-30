@@ -1,106 +1,72 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const getConnection = require("../../functions/database/connectDatabase");
-const canvacord = require('canvacord');
-const fs = require('fs');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leaderboard')
         .setDescription('Retrieve Leaderboard'),
-
+    usage: '',
     async execute(interaction, client) {
+        const userId = interaction.member.user.id;
         const guildId = interaction.guild?.id;
-
+        await interaction.deferReply();
         try {
             const connection = await getConnection();
+            const [topUsers] = await connection.query(
+                "SELECT userId, level, xp, totalxp FROM level WHERE guildId = ? ORDER BY level DESC, xp DESC LIMIT 10",
+                [guildId]
+            );
+            const [userRow] = await connection.query(
+                "SELECT userId, level FROM level WHERE userId = ? AND guildId = ?",
+                [interaction.member?.user.id, guildId]
+            );
+            const [cfgMiscRows] = await connection.query('SELECT mastercolor FROM cfg_misc WHERE guild_id = ?', [interaction.guild?.id]);
+            const [userColorRow] = await connection.query("SELECT * FROM user_config WHERE user_id = ? AND guild_id = ?", [userId, guildId]);
 
-            // Fetch user data from the database
-            const [rows] = await connection.query('SELECT * FROM level WHERE guildId = ?', [guildId]);
-            const [customization] = await connection.query('SELECT leaderboard_style, leaderboard_background FROM cfg_lvl WHERE guild_id = ?', [guildId]);
-            connection.release();
-
-            // Check if user data exists
-            if (!rows || rows.length === 0) {
-                return interaction.reply('No data found for this server.');
-            }
-
-            // Sort users by level in descending order
-            rows.sort((a, b) => b.level - a.level);
-
-            // Fetch additional data from the database
-            const [cfgMiscRows] = await connection.query('SELECT mastercolor FROM cfg_misc WHERE guild_id = ?', [guildId]);
-            const [userColorRow] = await connection.query(`SELECT * FROM user_config WHERE user_id = ${interaction.member?.user.id} AND guild_id = ?`, [guildId]);
-
-            let embedColor;
             const defaultColor = cfgMiscRows[0].mastercolor;
             const userColor = userColorRow[0].usercolor;
-
+            let embedColor;
+            
             if (!userColor) {
                 embedColor = defaultColor;
             } else if (userColor) {
                 embedColor = userColor;
             }
 
-            canvacord.Font.loadDefault();
-            const members = interaction.guild?.memberCount;
-            const _custom_style = customization[0].leaderboard_style;
-            const _custom_background = customization[0].leaderboard_background;
+            connection.release();
 
-            // Create a new LeaderboardBuilder instance
-            const lb = new canvacord.LeaderboardBuilder()
-                .setHeader({
-                    title: `${interaction.guild?.name}`,
-                    image: `${interaction.guild?.iconURL()}`,
-                    subtitle: `${rows.length} Members on Leaderboard/${members} Total Members`,
-                })
-                .adjustCanvas(5000, 5000);
-
-            lb.setBackgroundColor(embedColor);
-
-            let style;
-                
-            if (!_custom_style || _custom_style == 'default' || _custom_style == 'Default') {
-                style = 'default';
-            } else if (_custom_style == 'horizontal' || _custom_style == 'Horizontal') {
-                style = 'horizontal';
+            if (!topUsers || topUsers.length === 0) {
+                return interaction.editReply('There is currently no data in the leaderboard.');
             }
 
-            console.log(style)
-            console.log(_custom_style);
+            const rank = topUsers.findIndex((row) => row.userId === interaction.member?.user.id) + 1;
 
-            // Array to hold player objects
-            const players = [];
+            const leaderboardEmbed = new EmbedBuilder()
+                .setColor(embedColor)
+                .setTitle('Leaderboard')
+                .setDescription('Top 10 Users by XP')
+                .setThumbnail(client.user?.displayAvatarURL())
+                .setTimestamp();
 
-            // Add player data to the leaderboard
-            rows.forEach((userData, index) => {
-                const rank = index + 1;
-                const userPlace = rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : `${rank}`;
-                const user = client.users.cache.get(userData.userId);
-                if (user) {
-                    players.push({
-                        avatar: user.displayAvatarURL({ format: 'png' }),
-                        username: user.username,
-                        level: userData.level,
-                        xp: userData.xp,
-                        rank: userPlace,
-                    });
-                }
-            });
+            let leaderboard = '';
 
-            // Set the players
-            lb.setPlayers(players);
-            lb.adjustCanvas();
-            lb.setVariant(style)
+            for (const [index, row] of topUsers.entries()) {
+                const user = await client.users.fetch(row.userId);
+                const place = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}`;
+                leaderboard += `${place} <@${user.id}>\nLevel ${row.level} | XP ${row.xp} | Total XP ${row.totalxp}\n`;
+            }
 
-            // Build the leaderboard
-            const image = await lb.build({ format: 'jpeg' });
-            const attachment = new AttachmentBuilder(image);
+            leaderboardEmbed.addFields({ name: 'Rankings', value: `${leaderboard}` });
 
-            // Reply with the leaderboard image
-            await interaction.reply({ files: [attachment] });
+            if (userRow && userRow.length > 0) {
+                const userPlace = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}`;
+                leaderboardEmbed.addFields({ name: 'Your Rank', value: `Rank: ${userPlace} | **Level** ${userRow[0].level}`, inline: true });
+            }
+
+            interaction.editReply({ embeds: [leaderboardEmbed] });
         } catch (error) {
             console.error(error);
-            await interaction.reply('An error occurred while fetching the leaderboard.');
+            interaction.editReply('An error occurred while fetching the leaderboard.');
         }
     },
 };

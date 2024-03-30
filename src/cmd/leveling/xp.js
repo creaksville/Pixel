@@ -1,5 +1,5 @@
 const getConnection = require('../../functions/database/connectDatabase');
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 const calculateLevelXp = require("../../utils/calculateLevelXp");
 const canvacord = require('canvacord');
 
@@ -29,7 +29,6 @@ module.exports = {
 
             const [miscRows] = await connection.query('SELECT mastercolor FROM cfg_misc WHERE guild_id = ?', [interaction.guild?.id]);
             const [userColorRow] = await connection.query(`SELECT * FROM user_config WHERE user_id = ${mentionedUserId || interaction.member?.user.id} AND guild_id = ?`, [guildId]);
-            const [customization] = await connection.query(`SELECT rankcard_background FROM cfg_lvl WHERE guild_id = ?`, [interaction.guild?.id]);
 
             console.log('Misc Rows:', miscRows);
 
@@ -42,7 +41,6 @@ module.exports = {
             let embedColor;
             const defaultColor = miscRows[0].mastercolor;
             const userColor = userColorRow[0].usercolor;
-            const _custom_background = customization[0].rankcard_background;
             
             if (!userColor) {
                 embedColor = defaultColor;
@@ -60,8 +58,8 @@ module.exports = {
             }
 
             const xpNeeded = calculateLevelXp(fetchedLevel.level);
-            //const xpPercentage = Math.floor((fetchedLevel?.xp / xpNeeded) * 100);
-            //const xpBar = getXPBar(fetchedLevel?.xp, xpNeeded, xpPercentage, fetchedLevel);
+            const xpPercentage = Math.floor((fetchedLevel?.xp / xpNeeded) * 100);
+            const xpBar = getXPBar(fetchedLevel?.xp, xpNeeded, xpPercentage, fetchedLevel);
             const nextUp = ranks?.find(m => rows?.level < m.levels);
 
             let nextUpStr = '';
@@ -83,34 +81,40 @@ module.exports = {
 
             // Check if the user's status is defined, or set it to 'online' if undefined
             const userStatus = specifiedUserObj?.presence?.status || 'online';
-            canvacord.Font.loadDefault();
 
-            const rank = new canvacord.RankCardBuilder()
+            /*const rank = new canvacord.Rank()
                 .setAvatar(specifiedUserObj?.user.displayAvatarURL({ size: 256 }))
                 .setLevel(fetchedLevel.level)
                 .setRank(currentRank)
                 .setCurrentXP(fetchedLevel.xp)
                 .setRequiredXP(xpNeeded)
                 .setStatus(userStatus) // Pass the user's status here
+                .setProgressBar(embedColor)
                 .setUsername(specifiedUserObj?.user.username);
-
-            if (!_custom_background || _custom_background == null) {
-                rank.setBackground(embedColor);
-            } else {
-                rank.setBackground(_custom_background);
-            }
 
             const data = await rank.build();
             const attachment = new AttachmentBuilder(data);
 
-            interaction.reply({ files: [attachment] });
+            interaction.reply({ files: [attachment] });*/
+
+            const rank = new EmbedBuilder()
+                .setColor(embedColor)
+                .setTitle(`XP for ${specifiedUserObj?.user.username}`)
+                .setDescription(`${nextUpStr}`)
+                .addFields({ name: '**XP**', value: `${fetchedLevel.xp}`, inline: true})
+                .addFields({ name: '**Total XP**', value: `${fetchedLevel.totalxp}`, inline: true})
+                .addFields({ name: '**Level**', value: `${fetchedLevel.level}`, inline: true})
+                .addFields({ name: '**XP Progress**', value: `${xpBar}`})
+                .setThumbnail(specifiedUserObj?.user.displayAvatarURL({ size: 256 }))
+                .setTimestamp()
+            
+            interaction.reply({ embeds: [rank] })
         } catch (error) {
             console.error(error);
         }
     }
 };
 
-/*
 function getXPBar(xp, xpNeeded, xpPercentage, row) {
     const progress = Math.floor((xp / xpNeeded) * 10);
     const filledBar = '🟥'.repeat(progress);
@@ -118,4 +122,3 @@ function getXPBar(xp, xpNeeded, xpPercentage, row) {
     const percentageBar = `${xpPercentage}%`;
     return `[${row.xp}/${xpNeeded}] ${filledBar}${emptyBar} ${percentageBar}`;
 }
-*/
