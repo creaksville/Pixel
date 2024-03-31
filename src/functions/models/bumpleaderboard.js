@@ -4,18 +4,17 @@ module.exports = async (client) => {
   try {
     const connection = await getConnection();
 
-    await connection.query(`CREATE TABLE IF NOT EXISTS cfg_misc (
+    await connection.query(`CREATE TABLE IF NOT EXISTS bumplb (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      guild_id TEXT,
+      guildId TEXT,
       guildname TEXT,
-      bumprole VARCHAR(255) DEFAULT 0,
-      autorole VARCHAR(255) DEFAULT 0,
-      mastercolor VARCHAR(255) DEFAULT '#000000'
+      userId TEXT,
+      username TEXT,
+      total_bumps INT
     )`);
-
     connection.release();
   } catch (error) {
-    console.error(error);
+    
   }
 }
 

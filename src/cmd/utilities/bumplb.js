@@ -3,8 +3,8 @@ const getConnection = require("../../functions/database/connectDatabase");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('leaderboard')
-        .setDescription('Retrieve Leaderboard'),
+        .setName('bumplb')
+        .setDescription('Retrieve Bump Leaderboard'),
     usage: '',
     async execute(interaction, client) {
         const userId = interaction.member.user.id;
@@ -13,11 +13,11 @@ module.exports = {
         try {
             const connection = await getConnection();
             const [topUsers] = await connection.query(
-                "SELECT userId, level, xp, totalxp FROM level WHERE guildId = ? ORDER BY level DESC, xp DESC LIMIT 10",
+                "SELECT userId, total_bumps FROM bumplb WHERE guildId = ? ORDER BY total_bumps DESC LIMIT 10",
                 [guildId]
             );
             const [userRow] = await connection.query(
-                "SELECT userId, level FROM level WHERE userId = ? AND guildId = ?",
+                "SELECT userId, total_bumps FROM bumplb WHERE userId = ? AND guildId = ?",
                 [interaction.member?.user.id, guildId]
             );
             const [cfgMiscRows] = await connection.query('SELECT mastercolor FROM cfg_misc WHERE guild_id = ?', [interaction.guild?.id]);
@@ -43,8 +43,8 @@ module.exports = {
 
             const leaderboardEmbed = new EmbedBuilder()
                 .setColor(embedColor)
-                .setTitle('Leaderboard')
-                .setDescription('Top 10 Users by XP')
+                .setTitle('Bump Leaderboard')
+                .setDescription(`Top 10 Bumpers in Server: ${interaction.guild?.name}`)
                 .setThumbnail(client.user?.displayAvatarURL())
                 .setTimestamp();
 
@@ -53,14 +53,14 @@ module.exports = {
             for (const [index, row] of topUsers.entries()) {
                 const user = await client.users.fetch(row.userId);
                 const place = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}`;
-                leaderboard += `${place} <@${user.id}>\nLevel ${row.level} | XP ${row.xp} | Total XP ${row.totalxp}\n`;
+                leaderboard += `${place} <@${user.id}>\nTotal Bumps: ${row.total_bumps}`;
             }
 
-            leaderboardEmbed.addFields({ name: 'Rankings', value: `${leaderboard}` });
+            leaderboardEmbed.addFields({ name: 'Bump Rankings', value: `${leaderboard}` });
 
             if (userRow && userRow.length > 0) {
                 const userPlace = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}`;
-                leaderboardEmbed.addFields({ name: 'Your Rank', value: `Rank: ${userPlace} | **Level** ${userRow[0].level}`, inline: true });
+                leaderboardEmbed.addFields({ name: 'Your Rank', value: `Rank: ${userPlace}\n**TOTAL BUMPS:** ${userRow[0].total_bumps}`, inline: true });
             }
 
             interaction.editReply({ embeds: [leaderboardEmbed] });

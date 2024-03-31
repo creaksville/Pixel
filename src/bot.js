@@ -10,6 +10,7 @@ const client = new Client({ intents: [
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildBans
 ] });
 
 client.commands = new Collection();
