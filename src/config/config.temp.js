@@ -32,6 +32,6 @@ module.exports = {
         }
     },
     version: {
-        version: "19.87.3"
+        version: "19.87.4"
     }
 };
