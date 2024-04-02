@@ -17,6 +17,22 @@ module.exports = async (client, message) => {
         const [enableRows] = await connection.query("SELECT funfact FROM cfg_enable WHERE guild_id = ?", [guild.id]);
         const [channelRows] = await connection.query("SELECT funfact FROM cfg_channels WHERE guild_id = ?", [guild.id]);
       connection.release();
+      const guildChannel = channelRows[0].funfact;
+
+      const channel = guild.channels.cache.get(guildChannel)
+
+      let webhook = await channel.fetchWebhooks();
+      const name = 'FUN FACTS'
+      webhook = webhook.find(wh => wh.name === name);
+
+      if (!webhook) {
+        console.log("Creating webhook with name:", name); // Log the name value
+        webhook = await channel.createWebhook({
+          name: name,
+          avatar: client.user?.displayAvatarURL(),
+          reason: 'none'
+        });
+      }
 
       setInterval(() => {
         const guildEnable = enableRows[0].funfact;
@@ -30,7 +46,6 @@ module.exports = async (client, message) => {
         lastFunFactIndex = funFactIndex;
             const funFact = funFacts[funFactIndex];
             const customMessage = "**Fun Fact:**";
-            const channelSend = client.channels.cache.get(guildChannel);
 
             const messageSend = new EmbedBuilder()
                 .setTitle(customMessage)
@@ -38,7 +53,7 @@ module.exports = async (client, message) => {
                 .setColor(embedColor)
                 .setTimestamp()
 
-            channelSend.send({embeds: [messageSend]});
+            webhook.send({embeds: [messageSend]});
       }, 24 * 60 * 60 * 1000);
     });
   } catch (error) {
