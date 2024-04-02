@@ -8,6 +8,7 @@ module.exports = async (client) => {
       id INT AUTO_INCREMENT PRIMARY KEY,
       guild_id VARCHAR(255),
       guild_name VARCHAR(255),
+      autopost BOOLEAN DEFAULT 0,
       autorole BOOLEAN DEFAULT 0,
       bump BOOLEAN DEFAULT 0,
       funfact BOOLEAN DEFAULT 0,
