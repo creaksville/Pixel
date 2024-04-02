@@ -3,3 +3,5 @@ node_modules
 src/backgrounds
 src/config/config.js
 src/config/webconfig.js
+src/custom/reddit-cache.json
+src/custom/rss-cache.json

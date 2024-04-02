@@ -57,8 +57,8 @@ module.exports = async (message, client) => {
               );
 
               const [bumpLB] = await connection.query(
-                  'SELECT * FROM bumplb WHERE guildId = ?',
-                  [query.guildId]
+                  'SELECT * FROM bumplb WHERE guildId = ? AND userId = ?',
+                  [query.guildId, query.userId]
               );
       
               if (Array.isArray(levelRows) && levelRows.length > 0) {

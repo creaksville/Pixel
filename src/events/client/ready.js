@@ -2,6 +2,7 @@ const config = require('../../config/config')
 const rss = require('./rss');
 const funfact = require('./funfact');
 const activityStart = require('./activityStart');
+const autopost = require('./autopost');
 const { Webhook } = require('discord-webhook-node');
 
 module.exports = {
@@ -15,6 +16,7 @@ module.exports = {
         rss(client);
         funfact(client);
         activityStart(client);
+        autopost(client);
 
         const endTimestamp = Date.now();
         const elapsed = endTimestamp - startTimestamp;

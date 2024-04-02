@@ -53,7 +53,7 @@ module.exports = {
             for (const [index, row] of topUsers.entries()) {
                 const user = await client.users.fetch(row.userId);
                 const place = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}`;
-                leaderboard += `${place} <@${user.id}>\nTotal Bumps: ${row.total_bumps}`;
+                leaderboard += `${place} <@${user.id}>\nTotal Bumps: ${row.total_bumps}\n`;
             }
 
             leaderboardEmbed.addFields({ name: 'Bump Rankings', value: `${leaderboard}` });
