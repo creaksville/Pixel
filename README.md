@@ -26,13 +26,15 @@ Level/Warn with Database
 
 Autorole Support (With Automatic Role Add when agreeing to Screening)
 
-Bump Reminder that Awards 300XP
+Bump Reminder that Awards 50 XP
 
 User Configurations
 
-Multi-Guild Support (Read More Below)
+Reddit Autoposts (Up to 10 Autopost Configurations)
 
-Potential Automod?
+Webhook Support for RSS and Fun Fact
+
+Multi-Guild Support (Read More Below)
 
 # Build the bot and self-host
 
