@@ -116,6 +116,87 @@ module.exports = async (message, client) => {
                 setTimeout(() => {
                     channel.send(`<@&${guildRole}> Don't forget to bump using DISBOARD the server to get more members!`);
                 }, 2 * 60 * 60 * 1000);
+            } else if (userId === "1028956609382199346") {
+                const disboardReminderEmbed = new EmbedBuilder()
+                    .setTitle('Thank You For Bumping to OneBump!!')
+                    .setDescription(`You have just Earned **${xpToGive} XP!!**\nPlease Check Back in 2 Hours!!`)
+                    .setColor(color)
+                    .setTimestamp();
+                channel.send({ embeds: [disboardReminderEmbed] });
+
+                const query = {
+                  userId: message.interaction?.user.id,
+                  guildId: message.guild.id,
+                  username: message.interaction?.user.username,
+                  guildname: message.guild.name
+              };
+      
+      
+              const [levelRows] = await connection.query(
+                  'SELECT * FROM level WHERE userId = ? AND guildId = ?',
+                  [query.userId, query.guildId]
+              );
+
+              const [bumpLB] = await connection.query(
+                  'SELECT * FROM bumplb WHERE guildId = ? AND userId = ?',
+                  [query.guildId, query.userId]
+              );
+      
+              if (Array.isArray(levelRows) && levelRows.length > 0) {
+                  const level = levelRows[0];
+                  level.xp += xpToGive;
+                  level.totalxp += xpToGive; // Update totalXP whenever XP is gained
+      
+                  // Check for level up
+                  const currentLevelXp = calculateLevelXp(level.level);
+                  if (level.xp >= currentLevelXp) {
+                      // Level up logic
+                      level.xp -= currentLevelXp;
+                      level.level += 1;
+      
+                      // Execute role assignment logic here
+      
+                      // Send level up message here
+                  }
+      
+                  // Update XP and totalXP in the database
+                  await connection.query(
+                      'UPDATE level SET xp = ?, level = ?, totalxp = ? WHERE userId = ? AND guildId = ?',
+                      [level.xp, level.level, level.totalxp, query.userId, query.guildId]
+                  );
+              } else {
+                  // If the user doesn't have a level record, create one
+                  const newLevel = {
+                      userId: query.userId,
+                      guildId: query.guildId,
+                      xp: xpToGive,
+                      totalxp: xpToGive,
+                      username: query.username, // Set username
+                      guildname: query.guildname, // Set guildname
+                      level: 0
+                  };
+      
+                  await connection.query('INSERT INTO level SET ?', newLevel);
+              }
+
+              const bump = bumpLB[0];
+
+              if (bump) {
+                  await connection.query(
+                      'UPDATE bumplb SET total_bumps = ? WHERE userId = ? AND guildId = ?',
+                      [bump.total_bumps + 1, query.userId, query.guildId]
+                  );
+              } else {
+                  // If the query didn't return any results, you may want to insert a new record instead
+                  await connection.query(
+                      'INSERT INTO bumplb (userId, username, guildId, guildname, total_bumps) VALUES (?, ?, ?, ?, 1)',
+                      [query.userId, query.username, query.guildId, query.guildname]
+                  );
+              }
+
+                setTimeout(() => {
+                    channel.send(`<@&${guildRole}> Don't forget to bump using OneBump the server to get more members!`);
+                }, 2 * 60 * 60 * 1000);
             }
         }
 

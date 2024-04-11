@@ -22,7 +22,7 @@ module.exports = {
             
             const connection = await getConnection();
                 const [cfgMiscRows] = await connection.query("SELECT * FROM cfg_misc WHERE guild_id = ?", [guildId]);
-                const [userColorRow] = await connection.query(`SELECT * FROM user_config WHERE user_id = ${user.id || interaction.member?.user.id} AND guild_id = ?`, [guildId]);
+                const [userColorRow] = await connection.query(`SELECT * FROM user_config WHERE user_id = ${interaction.member?.user.id || user.id} AND guild_id = ?`, [guildId]);
             const defaultColor = cfgMiscRows[0].mastercolor;
             const userColor = userColorRow[0].usercolor;
             let embedColor;
