@@ -32,7 +32,7 @@ module.exports = {
 
             console.log('Misc Rows:', miscRows);
 
-            const [rankingsRows] = await connection.query('SELECT levels, role_id FROM lvlroles WHERE guild_id = ? ORDER BY levels ASC', [interaction.guild?.id]);
+            const [rankingsRows] = await connection.query('SELECT levels, role_id FROM lvlroles WHERE guild_id = ? ORDER BY levels ASC', [guildId]);
             console.log('Rankings Rows:', rankingsRows);
 
             const fetchedLevel = rows[0];
@@ -60,7 +60,7 @@ module.exports = {
             const xpNeeded = calculateLevelXp(fetchedLevel.level);
             const xpPercentage = Math.floor((fetchedLevel?.xp / xpNeeded) * 100);
             const xpBar = getXPBar(fetchedLevel?.xp, xpNeeded, xpPercentage, fetchedLevel);
-            const nextUp = ranks?.find(m => rows?.level < m.levels);
+            const nextUp = ranks.find(m => fetchedLevel.level < m.levels);
 
             let nextUpStr = '';
             if (!nextUp) {
