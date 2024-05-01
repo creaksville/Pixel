@@ -7,15 +7,15 @@ module.exports = {
         .setDescription("Updates a Configuration Setting in a Specific DB Table (DEPRECATED SOON)")
         .addStringOption(option =>
             option
-              .setName('table')
-              .setDescription('Table to Look At')
-              .setRequired(true)
-              .addChoices(
-                { name: 'Enable/Disable', value: 'cfg_enable' },
-                { name: 'Channel IDs', value: 'cfg_channels' },
-                { name: 'Intervals', value: 'cfg_interval' },
-                { name: 'Miscellaneous', value: 'cfg_misc'}
-        ))
+                .setName('table')
+                .setDescription('Table to Look At')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Enable/Disable', value: 'cfg_enable' },
+                    { name: 'Channel IDs', value: 'cfg_channels' },
+                    { name: 'Intervals', value: 'cfg_interval' },
+                    { name: 'Miscellaneous', value: 'cfg_misc'}
+            ))
         .addStringOption(option =>
             option
                 .setName('setting')

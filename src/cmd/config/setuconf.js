@@ -1,4 +1,4 @@
-const { Client, ApplicationCommandOptionType, SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { Client, ApplicationCommandOptionType, SlashCommandBuilder } = require("discord.js");
 const getConnection = require("../../functions/database/connectDatabase");
 
 module.exports = {
@@ -24,10 +24,6 @@ module.exports = {
             const table = 'user_config';
             const setting = interaction.options.getString('setting');
             const value = interaction.options.getString('value');
-
-            if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-                return await interaction.reply('You Cannot Use This Command: Insufficient Permissions')
-            }
 
             if (!table || !setting || !value) {
                 return interaction.editReply('Please specify the setting, and value.');

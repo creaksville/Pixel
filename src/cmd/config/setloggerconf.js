@@ -7,12 +7,12 @@ module.exports = {
         .setDescription("Updates a Configuration Setting in a Specific DB Table (DEPRECATED SOON)")
         .addStringOption(option =>
             option
-              .setName('table')
-              .setDescription('Table to Look At')
-              .setRequired(true)
-              .addChoices(
-                { name: 'Enable/Disable', value: 'logger_enable' },
-                { name: 'Channel IDs', value: 'logger_channels' },
+                .setName('table')
+                .setDescription('Table to Look At')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Enable/Disable', value: 'logger_enable' },
+                    { name: 'Channel IDs', value: 'logger_channels' },
         ))
         .addStringOption(option =>
             option
@@ -50,7 +50,7 @@ module.exports = {
                 .setDescription('The Value for the Setting')
                 .setRequired(true)
         ),
-        usage: '<table> <setting> <value>',
+    usage: '<table> <setting> <value>',
     async execute(interaction, client) {
         try {
             await interaction.deferReply();

@@ -2,11 +2,11 @@ const { SlashCommandBuilder, Client, EmbedBuilder, ApplicationCommandOptionType 
 const getConnection = require("../../functions/database/connectDatabase"); // Import your MySQL connection pool
 
 module.exports = {
-      data: new SlashCommandBuilder()
-          .setName('getuconf')
-          .setDescription('Retrieves The User Configuration for the Guild (DEPRECATED SOON)'),
-      usage: '<table>',
-      async execute(interaction, client) {
+    data: new SlashCommandBuilder()
+        .setName('getuconf')
+        .setDescription('Retrieves The User Configuration for the Guild (DEPRECATED SOON)'),
+    usage: '<table>',
+    async execute(interaction, client) {
         try {
             const database = 'user_config';
 
@@ -36,10 +36,9 @@ module.exports = {
 
             connection.release();
 
-
             if (!guildSettings) return;
-                const [cfgMiscRows] = await connection.query("SELECT * FROM cfg_misc WHERE guild_id = ?", [guildId]);
-                const [userColorRow] = await connection.query("SELECT * FROM user_config WHERE user_id = ? AND guild_id = ?", [userId, guildId]);
+            const [cfgMiscRows] = await connection.query("SELECT * FROM cfg_misc WHERE guild_id = ?", [guildId]);
+            const [userColorRow] = await connection.query("SELECT * FROM user_config WHERE user_id = ? AND guild_id = ?", [userId, guildId]);
             let userColor = userColorRow[0]?.usercolor
             let defaultColor = cfgMiscRows[0]?.mastercolor;
             let embedColor;

@@ -117,6 +117,13 @@ module.exports = async (message, client) => {
                     channel.send(`<@&${guildRole}> Don't forget to bump using DISBOARD the server to get more members!`);
                 }, 2 * 60 * 60 * 1000);
             } else if (userId === "1028956609382199346") {
+                const onebumpReminders = new EmbedBuilder()
+                    .setTitle('Thank You For Bumping to OneBump!!')
+                    .setDescription(`You have just Earned **${xpToGive} XP!!**\nPlease Check Back in 2 Hours!!`)
+                    .setColor(color)
+                    .setTimestamp();
+                channel.send({ embeds: [onebumpReminders] });
+
                 const query = {
                     userId: message.interaction?.user.id,
                     guildId: message.guild.id,
@@ -186,6 +193,10 @@ module.exports = async (message, client) => {
                         [query.userId, query.username, query.guildId, query.guildname]
                     );
                 }
+
+                setTimeout(() => {
+                    channel.send(`<@&${guildRole}> Don't forget to </bump:1087411079367377038> using OneBump the server to get more members!`);
+                }, 4 * 60 * 60 * 1000);
             }
         }
 

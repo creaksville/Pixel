@@ -32,6 +32,11 @@ module.exports = {
         }
     },
     version: {
-        version: "19.88.5"
+        version: "19.94.1"
+    },
+    github: {
+        repo_owner: "your_github_name",
+        repo_name: "your_repo_name",
+        branch_name: "your_repo_branch"
     }
 };

@@ -2,20 +2,20 @@ const { SlashCommandBuilder, Client, EmbedBuilder, ApplicationCommandOptionType 
 const getConnection = require("../../functions/database/connectDatabase"); // Import your MySQL connection pool
 
 module.exports = {
-      data: new SlashCommandBuilder()
+    data: new SlashCommandBuilder()
           .setName('getlogger')
           .setDescription('Retrieves The Configuration for the Guild (DEPRECATED SOON)')
           .addStringOption(option =>
-              option
-                .setName('table')
-                .setDescription('Table to Look At')
-                .setRequired(true)
-                .addChoices(
-                    { name: 'Enable/Disable', value: 'logger_enable' },
-                    { name: 'Channel IDs', value: 'logger_channels' },
-                )),
-      usage: '<table>',
-      async execute(interaction, client) {
+                option
+                    .setName('table')
+                    .setDescription('Table to Look At')
+                    .setRequired(true)
+                    .addChoices(
+                        { name: 'Enable/Disable', value: 'logger_enable' },
+                        { name: 'Channel IDs', value: 'logger_channels' },
+                    )),
+    usage: '<table>',
+    async execute(interaction, client) {
         try {
             const database = interaction.options.getString('table');
 

@@ -3,20 +3,20 @@ const getConnection = require("../../functions/database/connectDatabase");
 
 module.exports = {
     data: new SlashCommandBuilder()
-      .setName('setranks')
-      .setDescription("Updates/Sets the Level Ranks (DEPRECATED SOON)")
-      .addRoleOption(option =>
-        option
-          .setName('role')
-          .setDescription('Selects The Role Assigned To The Level')
-          .setRequired(true)
-      )
-      .addStringOption(option =>
-        option
-          .setName('level')
-          .setDescription('Sets the Level Required For The Rank')
-          .setRequired(true)
-      ),
+        .setName('setranks')
+        .setDescription("Updates/Sets the Level Ranks (DEPRECATED SOON)")
+        .addRoleOption(option =>
+            option
+                .setName('role')
+                .setDescription('Selects The Role Assigned To The Level')
+                .setRequired(true)
+        )
+        .addStringOption(option =>
+            option
+                .setName('level')
+                .setDescription('Sets the Level Required For The Rank')
+                .setRequired(true)
+        ),
     usage: '<role> <level #>',
     async execute(interaction, client) {
         try {
