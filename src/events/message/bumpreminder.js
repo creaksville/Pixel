@@ -114,7 +114,7 @@ module.exports = async (message, client) => {
               }
 
                 setTimeout(() => {
-                    channel.send(`<@&${guildRole}> Don't forget to bump using DISBOARD the server to get more members!`);
+                    channel.send(`<@&${guildRole}> Don't forget to </bump:947088344167366698> using DISBOARD the server to get more members!`);
                 }, 2 * 60 * 60 * 1000);
             } else if (userId === "1028956609382199346") {
                 const onebumpReminders = new EmbedBuilder()

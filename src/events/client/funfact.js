@@ -70,7 +70,7 @@ module.exports = async (client, message) => {
         } finally {
           connection.release();
         }
-      }, 2 * 60 * 1000);
+      }, 24 * 60 * 60 * 1000);
     });
   } catch (error) {
     console.error("Error in main function:", error);
