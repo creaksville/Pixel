@@ -32,7 +32,7 @@ module.exports = {
         }
     },
     version: {
-        version: "19.98.5"
+        version: "20"
     },
     github: {
         repo_owner: "your_github_name",

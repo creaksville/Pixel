@@ -4,6 +4,7 @@ const { EmbedBuilder } = require('discord.js');
 const calculateLevelXp = require('../../utils/calculateLevelXp');
 
 module.exports = async (message, client) => {
+    if (!message.guild) return;
     try {
         const connection = await getConnection();
         const [colorRows] = await connection.query("SELECT mastercolor FROM cfg_misc WHERE guild_id = ?", [message.guild.id]);

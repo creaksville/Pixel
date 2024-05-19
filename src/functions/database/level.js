@@ -6,6 +6,7 @@ const cooldowns = new Set();
 
 module.exports = async (client) => {
     client.on('messageCreate', async (message) => {
+        if (!message.guild) return;
         const guildId = message.guild?.id;
         const userId = message.author?.id;
 

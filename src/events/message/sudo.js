@@ -1,6 +1,7 @@
 const getConnection = require('../../functions/database/connectDatabase');
 
 module.exports = async (message) => {
+    if (!message.guild) return;
     try {
         const connection = await getConnection();
             const [enableRows] = await connection.query("SELECT sudo FROM cfg_enable WHERE guild_id = ?", [message.guild.id]);

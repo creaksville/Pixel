@@ -1,3 +1,4 @@
+// events/channelUpdate.js
 const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const getConnection = require('../../functions/database/connectDatabase');
 
@@ -12,7 +13,7 @@ const CHANNEL_TYPE_MAP = {
 
 module.exports = {
     name: 'channelUpdate',
-    async execute(channel, oldChannel, client) {
+    async execute(oldChannel, channel, client) {
         try {
             if (!channel.guild) return;
 
@@ -22,13 +23,14 @@ module.exports = {
             const [miscRecordRow] = await connection.query("SELECT * FROM cfg_misc WHERE guild_id = ?", [channel.guild.id]);
             connection.release();
 
-            const existingChannelRecord = channelRecordRow[0].channelUpdate;
+            const existingChannelRecord = channelRecordRow[0]?.channelUpdate;
+            if (!existingChannelRecord) return;
             const logChannel = channel.guild.channels.cache.get(existingChannelRecord);
+            if (!logChannel) return;
 
-            console.log(existingChannelRecord);
-            const existingEnableRecord = enableRecordRow[0].channelUpdate;
-            console.log(existingEnableRecord);
-            const embedColor = miscRecordRow[0].mastercolor;
+            const existingEnableRecord = enableRecordRow[0]?.channelUpdate;
+            if (!existingEnableRecord) return;
+            const embedColor = miscRecordRow[0]?.mastercolor || '#00FF00';
 
             const changes = [];
 
@@ -40,6 +42,22 @@ module.exports = {
                 changes.push({ name: 'Topic', before: oldChannel.topic || 'No topic set', after: channel.topic || 'No topic set' });
             }
 
+            if (channel.nsfw !== oldChannel.nsfw) {
+                changes.push({ name: 'NSFW', before: oldChannel.nsfw ? 'Enabled' : 'Disabled', after: channel.nsfw ? 'Enabled' : 'Disabled' });
+            }
+
+            if (channel.type !== oldChannel.type) {
+                changes.push({ name: 'Type', before: CHANNEL_TYPE_MAP[oldChannel.type] || 'Unknown', after: CHANNEL_TYPE_MAP[channel.type] || 'Unknown' });
+            }
+
+            // Add additional checks for cooldown setting if needed
+            const oldSlowmode = oldChannel.rateLimitPerUser ?? 0;
+            const newSlowmode = channel.rateLimitPerUser ?? 0;
+
+            if (newSlowmode !== oldSlowmode) {
+                changes.push({ name: 'Slowmode', before: `${oldSlowmode}s`, after: `${newSlowmode}s` });
+            }
+
             const permissionsBefore = Array.from(oldChannel.permissionOverwrites.cache.values());
             const permissionsAfter = Array.from(channel.permissionOverwrites.cache.values());
             const permissionChanges = [];
@@ -47,10 +65,8 @@ module.exports = {
             for (const permissionBefore of permissionsBefore) {
                 const permissionAfter = permissionsAfter.find(p => p.id === permissionBefore.id);
                 if (!permissionAfter) {
-                    // Permission was removed
                     permissionChanges.push({ before: permissionBefore, after: null });
                 } else if (JSON.stringify(permissionBefore) !== JSON.stringify(permissionAfter)) {
-                    // Permission was updated
                     permissionChanges.push({ before: permissionBefore, after: permissionAfter });
                 }
             }
@@ -58,122 +74,82 @@ module.exports = {
             for (const permissionAfter of permissionsAfter) {
                 const permissionBefore = permissionsBefore.find(p => p.id === permissionAfter.id);
                 if (!permissionBefore) {
-                    // Permission was added
                     permissionChanges.push({ before: null, after: permissionAfter });
                 }
             }
+
 
             if (changes.length === 0 && permissionChanges.length === 0) {
                 return;
             }
 
-            const auditLogs = await channel.guild.fetchAuditLogs({
-                type: 11, // Indicates channel update events
-                limit: 1
-            });
-
-            const auditLogEntry = auditLogs.entries.first();
-            const { executor } = auditLogEntry;
-            await channel.guild.members.fetch(channel.guild.ownerId);
-            const guildOwner = channel.guild.members.cache.get(channel.guild.ownerId);
-
-            const serverNickname = guildOwner ? guildOwner.displayName : 'Unknown';
-            const username = guildOwner ? guildOwner.user.tag : 'Unknown';
-            const id = guildOwner ? guildOwner.user.id : 'Unknown';
-
-            const embed = new EmbedBuilder()
-                .setColor(embedColor)
-                .setAuthor({ name: `${username} (${serverNickname})`, iconURL: guildOwner.user.displayAvatarURL({ dynamic: true }) })
-                .setDescription(`${CHANNEL_TYPE_MAP[channel.type] ? CHANNEL_TYPE_MAP[channel.type] : 'Unsupported channel type'} Updated (${channel.name})`)
-                .addFields(changes.map(change => ({ name: change.name, value: formatChange(change) })));
-
-            if (permissionChanges.length > 0) {
-                permissionChanges.forEach(permChange => {
-                    embed.addFields({ name: 'Permission Changes', value: formatPermissionChange(permChange) });
+                const auditLogs = await channel.guild.fetchAuditLogs({
+                    type: 11, // Correctly use the integer for CHANNEL_UPDATE
+                    limit: 1
                 });
-            }
 
-            embed.addFields({ name: 'ID', value: `\`\`\`ini\nUser = ${id}\nChannel = ${channel.id}\`\`\`` })
-                .setTimestamp();
+                const auditLogEntry = auditLogs.entries.first();
+                const executor = auditLogEntry ? auditLogEntry.executor : null;
 
-            logChannel.send({ embeds: [embed] });
+                const embed = new EmbedBuilder()
+                    .setColor(embedColor)
+                    .setAuthor({ name: executor ? executor.tag : 'Unknown executor', iconURL: executor ? executor.displayAvatarURL({ dynamic: true }) : null })
+                    .setDescription(`${CHANNEL_TYPE_MAP[channel.type] ? CHANNEL_TYPE_MAP[channel.type] : 'Unsupported channel type'} Updated (${channel.name})`)
+                    .addFields(changes.map(change => ({ name: change.name, value: `${change.before} -> ${change.after}`, inline: true })));
+
+                if (permissionChanges.length > 0) {
+                    embed.addFields({ name: 'Permission Changes', value: formatPermissionChanges(permissionChanges) });
+                }
+
+                embed.addFields({ name: 'ID', value: `\`\`\`ini\nUser = ${executor ? executor.id : 'Unknown'}\nChannel = ${channel.id}\`\`\`` })
+                    .setTimestamp();
+
+                logChannel.send({ embeds: [embed] });
         } catch (error) {
             console.error(error);
         }
     }
-}
+};
 
-function formatChange(change) {
-    return `${change.after} -> ${change.before}`;
-}
 
-function formatPermissionChange(permissionChange) {
-    const { before, after } = permissionChange;
-    const permissionTypes = {
-        role: 'Role',
-        member: 'Member',
-    };
 
-    if (before === null) {
-        return `Added ${permissionTypes[after.type]}: ${after.id}\n` +
-               `Allowed: ${getPermissionsList(after.allow)}\n` +
-               `Denied: ${getPermissionsList(after.deny)}`;
-    }
+function formatPermissionChanges(permissionChanges) {
+    return permissionChanges.map(permissionChange => {
+        const { before, after } = permissionChange;
+        let changes = '';
 
-    if (after === null) {
-        return `Removed ${permissionTypes[before.type]}: ${before.id}`;
-    }
+        if (!before) {
+            changes += `Added permissions for ${after.type === 0 ? `<@&${after.id}>` : `<@${after.id}>`}`
+        } else if (!after) {
+            changes += `Removed permissions for ${before.type === 0 ? `<@&${before.id}>` : `<@${before.id}>`}`;
+        } else {
+            const addedPermissions = getPermissionsList(after.allow & ~before.allow).map(permission => `✅: ${permission}`);
+            const removedPermissions = getPermissionsList(before.allow & ~after.allow);
+            const addedDenies = getPermissionsList(after.deny & ~before.deny).map(permission => `❌: ${permission}`);
+            const removedDenies = getPermissionsList(before.deny & ~after.deny);
 
-    const changedPermissions = [];
-    const addedPermissions = [];
-    const removedPermissions = [];
+            if (addedPermissions.length) changes += `${addedPermissions.join(',\n')}\n`;
+            if (removedPermissions.length) changes += `${removedPermissions.join(',\n')}\n`;
+            if (addedDenies.length) changes += `${addedDenies.join(',\n')}\n`;
+            if (removedDenies.length) changes += `${removedDenies.join(',\n')}\n`;
 
-    if (before.allow !== after.allow) {
-        const beforeAllow = getPermissionsList(before.allow);
-        const afterAllow = getPermissionsList(after.allow);
 
-        if (beforeAllow.length > 0 && afterAllow.length > 0) {
-            addedPermissions.push(`Allowed: ${afterAllow}`);
-            removedPermissions.push(`Allowed: ${beforeAllow}`);
-        } else if (beforeAllow.length > 0) {
-            removedPermissions.push(`Allowed: ${beforeAllow}`);
-        } else if (afterAllow.length > 0) {
-            addedPermissions.push(`Allowed: ${afterAllow}`);
+            if (!changes) {
+                changes = 'No changes in permissions';
+            }
         }
-    }
 
-    if (before.deny !== after.deny) {
-        const beforeDeny = getPermissionsList(before.deny);
-        const afterDeny = getPermissionsList(after.deny);
-
-        if (beforeDeny.length > 0 && afterDeny.length > 0) {
-            addedPermissions.push(`Denied: ${afterDeny}`);
-            removedPermissions.push(`Denied: ${beforeDeny}`);
-        } else if (beforeDeny.length > 0) {
-            removedPermissions.push(`Denied: ${beforeDeny}`);
-        } else if (afterDeny.length > 0) {
-            addedPermissions.push(`Denied: ${afterDeny}`);
-        }
-    }
-
-    if (addedPermissions.length > 0) {
-        changedPermissions.push(`Added ${permissionTypes[before.type]}: ${before.id}\n${addedPermissions.join('\n')}`);
-    }
-
-    if (removedPermissions.length > 0) {
-        changedPermissions.push(`Removed ${permissionTypes[before.type]}: ${before.id}\n${removedPermissions.join('\n')}`);
-    }
-
-    return `Updated ${permissionTypes[before.type]}:\n${before.id}\n${changedPermissions.join('\n')}`;
+        return changes;
+    }).join('\n\n');
 }
+
 
 function getPermissionsList(permissions) {
-    const permissionNames = [];
-
     if (permissions === '0') {
         return ['None'];
     }
 
+    const permissionNames = [];
     for (const [key, value] of Object.entries(PermissionFlagsBits)) {
         if (permissions & value) {
             permissionNames.push(key);

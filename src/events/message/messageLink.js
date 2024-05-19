@@ -3,7 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 
 module.exports = async (message, client) => {
     try {
-      if (message.author.bot) return;
+      if (message.author.bot || !message.guild) return;
 
       const connection = await getConnection();
         const [miscRows] = await connection.query("SELECT mastercolor FROM cfg_misc WHERE guild_id = ?", [message.guild.id]);

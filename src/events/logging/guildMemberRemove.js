@@ -3,7 +3,7 @@ const getConnection = require('../../functions/database/connectDatabase');
 console.log('Test')
 
 module.exports = {
-    name: 'guildMemberAdd',
+    name: 'guildMemberRemove',
     async execute(member, guild, client) {
         try {
             const userId = member?.user.id;
@@ -18,13 +18,13 @@ module.exports = {
                 const [miscRecordRow] = await connection.query("SELECT * FROM cfg_misc WHERE guild_id = ?", [member?.guild.id]);
             connection.release();
 
-            const banAddChannel = channelRecordRow[0]?.guildMemberAdd;
+            const banAddChannel = channelRecordRow[0]?.guildMemberDelete;
             if (!banAddChannel) return;
 
             const logChannel = guild.channels.cache.get(banAddChannel);
             if (!logChannel) return;
 
-            const existingEnableRecord = enableRecordRow[0]?.guildMemberAdd;
+            const existingEnableRecord = enableRecordRow[0]?.guildMemberDelete;
             if (!existingEnableRecord) return;
 
             const embedColor = miscRecordRow[0]?.mastercolor || '#00FF00';
@@ -34,11 +34,9 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setColor(embedColor)
                 .setAuthor({ name: `${username}`, iconURL: member?.user.displayAvatarURL({ dynamic: true }) })
-                .setDescription(`<@${userId}> joined`)
+                .setDescription(`<@${userId}> Left`)
                 .addFields(
                     { name: 'Name', value: `${username} (${userId})` },
-                    { name: 'Joined At', value: `<t:${Math.round(Date.now() / 1000)}:F>` },
-                    { name: 'Account Age', value: `**${Math.floor((new Date() - userCreated) / 86400000)}** days`, inline: true},
                     { name: 'Member Count', value: member?.guild.memberCount.toLocaleString(), inline: true}
                 )
                 .setTimestamp();
