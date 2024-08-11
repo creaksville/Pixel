@@ -24,23 +24,27 @@ module.exports = {
 
             // Check for role changes
             const filterRoles = role => !role.name.startsWith('✴');
-            const oldRoles = oldMember.roles.cache.filter(filterRoles).sort((a, b) => b.position - a.position).map(role => `<@&${role.id}>`);
-            const newRoles = newMember.roles.cache.filter(filterRoles).sort((a, b) => b.position - a.position).map(role => `<@&${role.id}>`);
+            const oldRoles = oldMember.roles.cache.filter(filterRoles);
+            const newRoles = newMember.roles.cache.filter(filterRoles);
 
-            if (oldRoles.join(', ') !== newRoles.join(', ')) {
+            const addedRoles = newRoles.filter(role => !oldRoles.has(role.id));
+            const removedRoles = oldRoles.filter(role => !newRoles.has(role.id));
+            const unchangedRoles = newRoles.filter(role => oldRoles.has(role.id));
+
+            if (addedRoles.size > 0 || removedRoles.size > 0) {
                 const maxDisplayRoles = 5;
 
-                const displayOldRoles = oldRoles.length > maxDisplayRoles 
-                    ? oldRoles.slice(0, maxDisplayRoles).join(', ') + `, +${oldRoles.length - maxDisplayRoles} Other Roles` 
-                    : oldRoles.join(', ');
+                const displayAddedRoles = addedRoles.size > maxDisplayRoles 
+                    ? addedRoles.map(role => `<@&${role.id}>`).slice(0, maxDisplayRoles).join(', ') + `, +${addedRoles.size - maxDisplayRoles} More` 
+                    : addedRoles.map(role => `<@&${role.id}>`).join(', ');
 
-                const displayNewRoles = newRoles.length > maxDisplayRoles 
-                    ? newRoles.slice(0, maxDisplayRoles).join(', ') + `, +${newRoles.length - maxDisplayRoles} Other Roles` 
-                    : newRoles.join(', ');
+                const displayRemainingOldRoles = unchangedRoles.size + removedRoles.size > maxDisplayRoles 
+                    ? unchangedRoles.map(role => `<@&${role.id}>`).concat(removedRoles.map(role => `<@&${role.id}>`)).slice(0, maxDisplayRoles).join(', ') + `, +${unchangedRoles.size + removedRoles.size - maxDisplayRoles} More` 
+                    : unchangedRoles.map(role => `<@&${role.id}>`).concat(removedRoles.map(role => `<@&${role.id}>`)).join(', ');
 
                 changes.push({
                     name: 'Role Update',
-                    value: `**Old Roles:**\n${displayOldRoles}\n**New Roles:**\n${displayNewRoles}`,
+                    value: `**New Roles:**\n${displayAddedRoles}\n**Old Roles:**\n${displayRemainingOldRoles}`,
                 });
             }
 

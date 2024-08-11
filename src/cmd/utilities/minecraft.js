@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, time, TimestampStyles } = require('discord.js');
 const getConnection = require("../../functions/database/connectDatabase");
 
 module.exports = {
@@ -20,10 +20,17 @@ module.exports = {
                         .setDescription('Set the Status')
                         .setRequired(true)
                         .addChoices(
-                            { name: 'Online', value: 'online'},
-                            { name: 'Offline', value: 'offline'}
+                            { name: '🟢 Online', value: 'online' },
+                            { name: '🟠 Down for Maintenance', value: 'maintenance' },
+                            { name: '🔴 Offline', value: 'offline' },
+                            { name: '🔵 Information', value: 'info'}
                         )
                 )
+                .addStringOption(option =>
+                    option
+                        .setName('info')
+                        .setDescription('The Information for the Status Update')
+                        .setRequired(true)),
             ),
     usage: '<get>/<set> <status>',
     async execute(interaction, client) {
@@ -44,6 +51,9 @@ module.exports = {
             } else if (userColor) {
                 embedColor = userColor;
             }
+            const date = new Date();
+
+            const longTime = time(date, TimestampStyles.LongTime);
 
             const statusRecord = serverStatus[0].status;
             const statusChannel = channel[0].minecraft;
@@ -51,23 +61,38 @@ module.exports = {
             let embedRecord;
 
             if (statusRecord === 'Online' || statusRecord === 'online') {
-                embedRecord = '🟢: Online'
+                embedRecord = '🟢 - Online'
             } else if (statusRecord === 'Offline' || statusRecord === 'offline') {
-                embedRecord = '🔴: Offline'
+                embedRecord = '🔴 - Offline'
+            } else if (statusRecord === 'Maintenance' || statusRecord === 'maintenance') {
+                embedRecord = '🟠 - Down For Maintenace'
+            } else if (statusRecord === 'Info' || statusRecord === 'info') {
+                embedRecord = '🔵 - Information'
             }
+
+            
             
             if (interaction.options.getSubcommand() === 'set') {
                 const statusOption = interaction.options.getString('status');
+                const statusInfo = interaction.options.getString('info');
                 if (statusOption === 'online') {
-                    const onlineTopic = 'Status: 🟢 Online | IP: hhavensmp.com';
                     connection.query(`UPDATE cfg_misc SET status = ? WHERE guild_id = ?`, [statusOption, interaction.guild.id]);
-                    await setChannel.edit({ topic: onlineTopic, name: '🟢-server-status' });
-                    await interaction.editReply('Status Updated in Topic and in Database');
+                    await setChannel.edit({ name: '🟢-server-status' });
+                    await interaction.editReply('Status Updated in Channel Name and in Database\nStatus Sent to Channel');
+                    await setChannel.send(`[${longTime}] | 🟢: Server Online\n**INFO**: ${statusInfo}`)
                 } else if (statusOption === 'offline') {
-                    const offlineTopic = 'Status: 🔴 Offline | IP: hhavensmp.com';
                     connection.query(`UPDATE cfg_misc SET status = ? WHERE guild_id = ?`, [statusOption, interaction.guild.id]);
-                    await setChannel.edit({ topic: offlineTopic, name: '🔴-server-status'  });
-                    await interaction.editReply('Status Updated in Topic and in Database');
+                    await setChannel.edit({ name: '🔴-server-status'  });
+                    await interaction.editReply('Status Updated in Channel Name and in Database\nStatus Sent to Channel');
+                    await setChannel.send(`[${longTime}] | 🔴: Server Offline\n**INFO**: ${statusInfo}`)
+                } else if (statusOption === 'maintenance') {
+                    connection.query(`UPDATE cfg_misc SET status = ? WHERE guild_id = ?`, [statusOption, interaction.guild.id]);
+                    await setChannel.edit({ name: '🟠-server-status' });
+                    await interaction.editReply('Status Updated in Channel Name and in Database\nStatus Sent to Channel');
+                    await setChannel.send(`[${longTime}] | 🟠: Server Down For Maintenance\n**INFO**: ${statusInfo}`)
+                } else if (statusOption === 'info') {
+                    await interaction.editReply('Status Sent to Channel');
+                    await setChannel.send(`[${longTime}] | 🔵: New Information for Server\n**INFO**: ${statusInfo}`)
                 }
             } else if (interaction.options.getSubcommand() === 'get') {
                 const embed = new EmbedBuilder()

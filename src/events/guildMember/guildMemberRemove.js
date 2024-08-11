@@ -21,6 +21,7 @@ module.exports = {
         const embedColor = miscRows[0].mastercolor;
         const guildEnable = enableRows[0].leaver;
         const guildChannel = channelRows[0].leaver;
+	const userAvatar = guildMember.user.avatarURL() || 'https://i.pinimg.com/736x/8e/c8/98/8ec898fb5ca16f63a9557c2794b23a72.jpg';
 
         if (guildEnable && guildChannel && guildEnable === 1) {
             const newEmbed = new EmbedBuilder()
@@ -31,7 +32,7 @@ module.exports = {
                     {name: `We Are Sad To See You Go \:(`, value: `**We Hope To See You Soon**`},
                     {name: 'Member:', value: `**${guildMember?.user.tag}**`},
                 )
-                .setThumbnail(guildMember.user.avatarURL())
+                .setThumbnail(userAvatar)
                 .setTimestamp();
             
             guildMember.guild.channels.cache.get(guildChannel).send({ embeds: [newEmbed] });

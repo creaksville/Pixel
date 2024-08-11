@@ -5,3 +5,4 @@ src/config/config.js
 src/config/webconfig.js
 src/custom/reddit-cache.json
 src/custom/rss-cache.json
+src/custom/welcome-config.json
