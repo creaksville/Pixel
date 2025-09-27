@@ -14,7 +14,7 @@ module.exports = async (client) => {
         leaver VARCHAR(255) DEFAULT 0,
         rss VARCHAR(255) DEFAULT 0,
         levelup VARCHAR(255) DEFAULT 0,
-        modmail VARCHAR(255) DEFAULT 0,
+        modmail VARCHAR(255) DEFAULT 0
     )`);
 
     connection.release();

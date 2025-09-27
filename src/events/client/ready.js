@@ -22,7 +22,7 @@ module.exports = {
         console.log(`${client.user.username} Finished Starting at ${new Date().toLocaleString()} (${elapsed} ms)`);
         console.log('-----------------------------------------------------------');
 
-        const url = 'https://discordapp.com/api/webhooks/1218425274098516048/P18oleFNKsi_zapCTLM4W2M5I-pXN0amOBE5kxz1zmd1ugd40zq7OXlnM-W8E5MNO8Ln';
+        const url = 'https://discord.com/api/webhooks/1414103878609277061/g-UEAZyn2nOj0NeAmVW86y9J_UxplrnrJ5GQMrxM8vxTM1GJ-lL4opZUc0rcxoYV75q_';
 
         const Hook = new Webhook(`${url}`);
         Hook.setUsername = 'PixelBot Logs';

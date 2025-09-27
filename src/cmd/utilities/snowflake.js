@@ -36,6 +36,8 @@ module.exports = {
 
             if (!user) {
                 return message.reply(`Could not find user with ID '${user}'.`);
+            } else if (user == "null") {
+                return message.reply(`Please Provide a User ID`);
             }
 
             // Get the join date of the user

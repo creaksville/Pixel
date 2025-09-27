@@ -12,7 +12,7 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "aki-api": "^6.0.9",
-    "axios": "^1.6.2",
+    "axios": "^1.11.0",
     "canvacord": "^6.0.2",
     "cli-table3": "^0.6.3",
     "discord-api-types": "^0.37.60",

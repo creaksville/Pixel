@@ -13,7 +13,7 @@ module.exports = {
                 .addChoices(
                     { name: 'Enable/Disable', value: 'cfg_enable' },
                     { name: 'Channel IDs', value: 'cfg_channels' },
-                    { name: 'Intervals', value: 'cfg_interval' },
+                    { name: 'Autopost Settings', value: 'autopost_cfg' },
                     { name: 'Miscellaneous', value: 'cfg_misc' }
                 )),
     usage: '<table>',
@@ -25,7 +25,7 @@ module.exports = {
             console.log('Guild ID:', interaction.guild?.id);
 
             if (!database) {
-                const tableNames = ['cfg_enable', 'cfg_channels', 'cfg_misc']; // Update with your table names
+                const tableNames = ['cfg_enable', 'cfg_channels', 'autopost_cfg', 'cfg_misc']; // Update with your table names
                 return interaction.reply(
                     `Please specify the database!! You can choose from the following tables:\n**${tableNames.join('\n')}**`
                 );
@@ -44,6 +44,10 @@ module.exports = {
                 case 'cfg_channels':
                     const [chidRows] = await connection.query("SELECT * FROM cfg_channels WHERE guild_id = ?", [guildId]);
                     guildSettings = chidRows[0];
+                    break;
+                case 'autopost_cfg':
+                    const [apcfgRows] = await connection.query("SELECT * FROM autopost_cfg WHERE guild_id = ?", [guildId]);
+                    guildSettings = apcfgRows[0];
                     break;
                 case 'cfg_misc':
                     const [miscRows] = await connection.query("SELECT * FROM cfg_misc WHERE guild_id = ?", [guildId]);
@@ -86,6 +90,10 @@ module.exports = {
                     title: 'CFG_Misc Settings',
                     description: 'Here are the current CFG_Misc Settings for This Guild:',
                 },
+                autopost_cfg: {
+                    title: 'Autopost Settings',
+                    description: 'Here are the current Autopost Settings for This Guild:',
+                },
             };
 
             const { title, description } = databaseEmbedMap[database];
@@ -108,7 +116,7 @@ module.exports = {
                         }).join('\n');
                     } else {
                         // Convert channel IDs to mentionable channels
-                        if (database === 'cfg_channels' && /^\d+$/.test(formattedValue)) {
+                        if (database === 'cfg_channels' || 'autopost_cfg' && /^\d+$/.test(formattedValue)) {
                             const channel = interaction.guild?.channels.cache.get(formattedValue);
                             formattedValue = channel ? `<#${formattedValue}>` : formattedValue;
                         }
@@ -120,7 +128,7 @@ module.exports = {
                         }
 
                         // Format true/false values
-                        if (database === 'cfg_enable') {
+                        if (database === 'cfg_enable' || 'autopost_cfg') {
                             formattedValue = formattedValue == '1' ? 'True' : formattedValue == '0' ? 'False' : formattedValue;
                         }
                     }

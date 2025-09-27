@@ -9,7 +9,8 @@ module.exports = {
             type: "WATCHING"
         },
         api_key: 'APIHUB KEY HERE',
-        urban_api_host: 'URBAN DICTIONARY API URL FROM APIHUB HERE'
+        urban_api_host: 'URBAN DICTIONARY API URL FROM APIHUB HERE',
+        reddit_api_host: 'REDDIT API URL FROM APIHUB HERE'
     },
     plugins: {
         funfact: {

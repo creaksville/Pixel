@@ -13,7 +13,7 @@ module.exports = {
                 .addChoices(
                     { name: 'Enable/Disable', value: 'cfg_enable' },
                     { name: 'Channel IDs', value: 'cfg_channels' },
-                    { name: 'Intervals', value: 'cfg_interval' },
+                    { name: 'Autopost Settings', value: 'autopost_cfg' },
                     { name: 'Miscellaneous', value: 'cfg_misc'}
             ))
         .addStringOption(option =>
@@ -47,6 +47,7 @@ module.exports = {
                 cfg_enable: 'cfg_enable',
                 cfg_channels: 'cfg_channels',
                 cfg_misc: 'cfg_misc',
+                autopost_cfg: 'autopost_cfg',
             };
 
             const tableName = tableMap[table];

@@ -6,3 +6,7 @@ src/config/webconfig.js
 src/custom/reddit-cache.json
 src/custom/rss-cache.json
 src/custom/welcome-config.json
+src/functions/models/autopost_channels.js
+src/functions/models/cfg_channel2.js
+src/events/client/reddit_main.js
+src/events/client/reddit_nsfw.js
