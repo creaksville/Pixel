@@ -5,7 +5,7 @@ An All New Multi-Purpose Discord Bot, ran on discord.js
 
 <p align="center">
   <a href="https://github.com/creaksville/Pixel/blob/production/LICENSE" alt="License"><img src="https://img.shields.io/github/license/creaksville/Pixel"></img></a>
-  <a href="https://discord.gg/YyYNBKuwj3" alt="Discord"><img src="https://img.shields.io/discord/1414077195571433573?color=%23900000&label=Online&logo=The%20Nerds&style=flat"></img></a>
+  <a href="https://discord.gg/YyYNBKuwj3" alt="Discord"><img src="https://img.shields.io/discord/1414141163039883305?color=%23900000&label=Online&logo=The%20Nerds&style=flat"></img></a>
   <a href="https://github.com/creaksville/Pixel/issues" alt="Issues"><img src="https://img.shields.io/github/issues/creaksville/Pixel"></img></a>
 </p>
 An All New Multi-Purpose, Multi-Guilded Discord Bot
